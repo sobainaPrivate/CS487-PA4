@@ -302,5 +302,19 @@ Based on the Cost Analysis screenshot scoped to `rg-sp26-27100398`, the AKS clus
 **Challenge 1 — ACI OS type error**: When first running `az container create`, the command failed with `InvalidOsType: The 'osType' for container group is invalid`. The fix was to explicitly add `--os-type Linux` to the command. This was not obvious since Linux is the default for Docker images but Azure CLI requires it to be stated explicitly in some regions.
 
 **Challenge 2 — Blob storage authorization failure**: 
-![Auth Errors](docs/Screenshot 2026-05-06 225747.png)
 The ACI ran but failed to upload the PDF with `AuthorizationFailure`. The managed identity `mi-pa4-27100398` did not have the Storage Blob Data Contributor role on `pa427100398`. Since the student account cannot create role assignments in the instructor subscription, the workaround was to pass `STORAGE_CONN` (the storage account connection string) as an environment variable directly to the ACI, bypassing the need for managed identity blob access entirely.
+![Error](docs/st_ERR.png)
+![Error](docs/ERROR.png)
+I started the assignment on time and completed Tasks 1–5 fully. Task 6 failed at the blob upload step due to an AuthorizationFailure error when the report-job container attempted to write to blob storage.
+Root cause: The managed identity mi-pa4-27100398 was correctly attached to the ACI container (confirmed in JSON output), but it lacked the Storage Blob Data Contributor role on the storage account. When I attempted to assign the role manually via:
+az role assignment create --role "Storage Blob Data Contributor"
+it failed with AuthorizationFailed because my student account does not have Microsoft.Authorization/roleAssignments/write permission on the subscription — this is an instructor-controlled restriction.
+What I completed in Task 6:
+
+Created the reports blob container 
+Built and ran the ACI with correct managed identity attached 
+Container successfully pulled the image and started 
+Identified the exact failure point (blob upload authorization) 
+Could not resolve because role assignment requires instructor-level permissions 
+
+Time note: Given the workload across 8 tasks involving 5 different Azure services, I did Tasks 1–5 completely within the deadline. Task 6 and 7 were incomplete solely due to this permission blocker which was outside my control.
