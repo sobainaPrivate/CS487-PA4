@@ -265,7 +265,7 @@ An invalid order (qty=999) was submitted. The UI showed the rejection message an
 
 ### Evidence 8.1: Architecture Diagram
 
-![Architecture Diagram](docs/architecture-diagram.png)
+![Architecture Diagram](docs/artitrcture.jpg)
 
 The diagram shows all Azure resources: GitHub → App Service (CI/CD), Web App → Function App (start + status polling), Function App → AKS Cluster (validate HTTP call), Function App → Container Instance (SDK-based creation, ephemeral per run), Container Instance → Blob Storage (PDF write), and ACR providing images to all three container services. The managed identity relationship between the Function App and the resource group is also shown.
 
