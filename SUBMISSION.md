@@ -283,13 +283,13 @@ The diagram shows all Azure resources: GitHub → App Service (CI/CD), Web App �
 
 **AKS idle behavior**: When the AKS cluster is idle for 10 minutes, the node VM continues running and billing at the `Standard_B2s` hourly rate. The validator pod stays in `Running` state, ready to accept the next request instantly. There is no scale-to-zero on a standard AKS cluster — idle means full cost.
 
-**ACI idle behavior**: "Idle" has no meaning for ACI in this pipeline. The report-job ACI does not exist between orders — it is created by `report_activity`, runs for ~20-30 seconds, and is deleted. There is no idle state; billing is per-second during execution only.
+**ACI idle behavior**: "Idle" has no meaning for ACI in this pipeline. The report-job ACI does not exist between orders it is created by `report_activity`, runs for ~20-30 seconds, and is deleted. There is no idle state; billing is per-second during execution only.
 
 **Spam scenario**: If a malicious user submitted 1000 orders in a minute, AKS would incur minimal extra cost (the node is already running and paid for). ACI would incur 1000× the per-run cost since each order spawns a new container instance, each billed for its execution time. The Durable Function orchestrator itself would also scale horizontally, potentially increasing Function App compute costs.
 
 ### Question 8.4: Durable Functions vs Plain HTTP
 
-If the same flow were implemented as two plain HTTP-triggered functions calling each other, two concrete problems would arise. First, **function timeouts**: the report step can take up to 60 seconds; standard HTTP-triggered Azure Functions have a default timeout of 5 minutes on Consumption plans, but the calling function would hold an open HTTP connection for the entire duration — fragile and wasteful. Second, **no state persistence or automatic retry**: if `report_activity` fails halfway through creating the ACI, a plain HTTP function has no built-in mechanism to resume from where it left off. The entire request would fail and the caller would need to retry from the beginning, potentially re-validating and double-charging. Durable Functions checkpoints state after each activity, so retries resume from the failed step without re-executing completed ones.
+If the same flow were implemented as two plain HTTP-triggered functions calling each other, two concrete problems would arise. First, **function timeouts**: the report step can take up to 60 seconds; standard HTTP-triggered Azure Functions have a default timeout of 5 minutes on Consumption plans, but the calling function would hold an open HTTP connection for the entire duration  fragile and wasteful. Second, **no state persistence or automatic retry**: if `report_activity` fails halfway through creating the ACI, a plain HTTP function has no built-in mechanism to resume from where it left off. The entire request would fail and the caller would need to retry from the beginning, potentially re-validating and double-charging. Durable Functions checkpoints state after each activity, so retries resume from the failed step without re-executing completed ones.
 
 ### Question 8.5: Cost Review
 
@@ -308,7 +308,7 @@ The ACI ran but failed to upload the PDF with `AuthorizationFailure`. The manage
 I started the assignment on time and completed Tasks 1–5 fully. Task 6 failed at the blob upload step due to an AuthorizationFailure error when the report-job container attempted to write to blob storage.
 Root cause: The managed identity mi-pa4-27100398 was correctly attached to the ACI container (confirmed in JSON output), but it lacked the Storage Blob Data Contributor role on the storage account. When I attempted to assign the role manually via:
 az role assignment create --role "Storage Blob Data Contributor"
-it failed with AuthorizationFailed because my student account does not have Microsoft.Authorization/roleAssignments/write permission on the subscription — this is an instructor-controlled restriction.
+it failed with AuthorizationFailed because my student account does not have Microsoft.Authorization/roleAssignments/write permission on the subscription ...this is an instructor-controlled restriction.
 What I completed in Task 6:
 
 Created the reports blob container 
