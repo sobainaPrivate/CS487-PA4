@@ -27,25 +27,25 @@
 
 ### Evidence 1.1: Forked Repository
 
-![Forked Repository](docs/task1-forked-repo.png)
+![Forked Repository](docs/Github_forked.png)
 
 This is my working fork of the PA4 starter repository at `https://github.com/sobainaPrivate/CS487-PA4`. It contains the full PA4 starter structure including `webapp/`, `function-app/`, `validate-api/`, and `report-job/` directories.
 
 ### Evidence 1.2: App Service Overview
 
-![App Service Overview](docs/task1-webapp-overview.png)
+![App Service Overview](docs/running_app.jpg)
 
 The Web App `pa4-27100398` is deployed in resource group `rg-sp26-27100398`, region `ukwest`, running on Node 20 LTS. It is in `Running` status and accessible at `https://pa4-27100398.azurewebsites.net`.
 
 ### Evidence 1.3: Deployment Center / GitHub Actions
 
-![Deployment Center](docs/task1-deployment-center.png)
+![Deployment Center](docs/portalGithub.png)
 
 The Web App is connected to my GitHub fork (`sobainaPrivate/CS487-PA4`, `main` branch) via the Azure Deployment Center. GitHub Actions automatically triggers a deployment on every push to `main`.
 
 ### Evidence 1.4: Live Web UI
 
-![Live Web UI](docs/task1-live-webapp.png)
+![Live Web UI](docs/TaskFlow.png)
 
 The TaskFlow order form loads successfully over HTTPS from App Service. The frontend is being served correctly by the `pa4-27100398` Web App.
 
