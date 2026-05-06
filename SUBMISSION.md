@@ -293,7 +293,7 @@ If the same flow were implemented as two plain HTTP-triggered functions calling 
 
 ### Question 8.5: Cost Review
 
-![Cost Management](docs/task8-cost-review.png)
+
 
 Based on the Cost Analysis screenshot scoped to `rg-sp26-27100398`, the AKS cluster (`pa4-27100398`) is the single most expensive resource because its `Standard_B2s` node VM runs continuously regardless of traffic. The App Service Plan (shared by the Web App and Function App) is the second largest cost. ACR and ACI costs are minimal — ACR charges for storage and operations, while ACI only billed during the short test runs.
 
@@ -301,4 +301,6 @@ Based on the Cost Analysis screenshot scoped to `rg-sp26-27100398`, the AKS clus
 
 **Challenge 1 — ACI OS type error**: When first running `az container create`, the command failed with `InvalidOsType: The 'osType' for container group is invalid`. The fix was to explicitly add `--os-type Linux` to the command. This was not obvious since Linux is the default for Docker images but Azure CLI requires it to be stated explicitly in some regions.
 
-**Challenge 2 — Blob storage authorization failure**: The ACI ran but failed to upload the PDF with `AuthorizationFailure`. The managed identity `mi-pa4-27100398` did not have the Storage Blob Data Contributor role on `pa427100398`. Since the student account cannot create role assignments in the instructor subscription, the workaround was to pass `STORAGE_CONN` (the storage account connection string) as an environment variable directly to the ACI, bypassing the need for managed identity blob access entirely.
+**Challenge 2 — Blob storage authorization failure**: 
+![Auth Errors](docs/Screenshot 2026-05-06 225747.png)
+The ACI ran but failed to upload the PDF with `AuthorizationFailure`. The managed identity `mi-pa4-27100398` did not have the Storage Blob Data Contributor role on `pa427100398`. Since the student account cannot create role assignments in the instructor subscription, the workaround was to pass `STORAGE_CONN` (the storage account connection string) as an environment variable directly to the ACI, bypassing the need for managed identity blob access entirely.
