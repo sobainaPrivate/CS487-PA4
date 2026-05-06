@@ -51,7 +51,7 @@ The TaskFlow order form loads successfully over HTTPS from App Service. The fron
 
 ### Evidence 1.5: Application Settings
 
-![Application Settings](docs/task1-app-settings.png)
+![Application Settings](docs/env_variables.png)
 
 The `FUNCTION_START_URL` and `FUNCTION_STATUS_URL` application settings are configured on the Web App. These will be populated with the actual Durable Function URLs after Task 4.
 
@@ -61,25 +61,27 @@ The `FUNCTION_START_URL` and `FUNCTION_STATUS_URL` application settings are conf
 
 ### Evidence 2.1: ACR Overview
 
-![ACR Overview](docs/task2-acr-overview.png)
+![ACR Overview](docs/overView_acr.png)
 
 The Azure Container Registry `pa427100398` is deployed in resource group `rg-sp26-27100398`, region `ukwest`, using the Basic SKU. Admin user is enabled to allow image pulls from AKS and ACI.
 
 ### Evidence 2.2: Docker Builds
 
-![Docker Builds](docs/task2-docker-builds.png)
+![Docker Builds](docs/imagePull1.png)
+![Docker Builds](docs/imagePull2.png)
+![Docker Builds](docs/imagePull3.png)
 
 All three images were built successfully locally: `validate-api:latest` (from `./validate-api`), `report-job:latest` (from `./report-job`), and `func-app:latest` (from `./function-app`). Built with `--platform linux/amd64` for Azure compatibility.
 
 ### Evidence 2.3: Local Validator Test
 
-![Local Validator Test](docs/task2-local-validator-test.png)
+![Local Validator Test](docs/image_build_func.png)
 
 The validator image was tested locally by running `docker run -p 8080:8080 validate-api:latest` and sending a POST to `http://localhost:8080/validate`. It returned a valid JSON response confirming the container works correctly.
 
 ### Evidence 2.4: ACR Push & Repositories
 
-![ACR Repositories](docs/task2-acr-repositories.png)
+![ACR Repositories](docs/acr_list.png)
 
 All three images were tagged and pushed to ACR:
 - `pa427100398.azurecr.io/validate-api:v1`
@@ -100,7 +102,7 @@ The orchestrator chains two activities: `validate_activity` POSTs the order to t
 
 ### Evidence 3.2: Local Function Handler Listing
 
-![func start output](docs/task3-func-start.png)
+![func start output](docs/func-start.png)
 
 Running `func start` in the `function-app/` directory shows all four Durable handlers registered: `http_starter` (HTTP trigger), `my_orchestrator` (orchestration trigger), `validate_activity` (activity trigger), and `report_activity` (activity trigger).
 
@@ -110,25 +112,25 @@ Running `func start` in the `function-app/` directory shows all four Durable han
 
 ### Evidence 4.1: Function App Container Configuration
 
-![Function App Container Config](docs/task4-funcapp-container.png)
+![Function App Container Config](docs/DEPLOY_FUC.png)
 
 The Function App `pa4-27100398` is configured to use the container image `pa427100398.azurecr.io/func-app:v1` from ACR. It runs on the same App Service Plan `pa4-27100398` as the Web App, using Python 3.11.
 
 ### Evidence 4.2: Function App Functions List
 
-![Functions List](docs/task4-functions-list.png)
+![Functions List](docs/func-start.png)
 
 The Azure Portal Functions list for `pa4-27100398` shows all four Durable handlers registered: `http_starter`, `my_orchestrator`, `validate_activity`, and `report_activity`.
 
 ### Evidence 4.3: Orchestration Smoke Test
 
-![Smoke Test curl output](docs/task4-smoke-test-curl.png)
+![Smoke Test curl output](docs/task4-smoke-test.png)
 
 The `curl` POST to the HTTP starter returned a JSON response containing an `id` and `statusQueryGetUri`, confirming the orchestration started successfully and the container image deployed correctly.
 
 ### Evidence 4.4: Expected Failed Status Before Downstream Wiring
 
-![Expected Failed Status](docs/task4-expected-failed-status.png)
+![Expected Failed Status](docs/Failed_URL.png)
 
 Polling the `statusQueryGetUri` shows `runtimeStatus: Failed` with an error about being unable to reach `VALIDATE_URL`. This is the expected checkpoint — it proves the Function App deployed successfully and the orchestrator ran far enough to attempt the validator call. The failure is corrected after Task 5 wires in the AKS service URL.
 
@@ -138,25 +140,25 @@ Polling the `statusQueryGetUri` shows `runtimeStatus: Failed` with an error abou
 
 ### Evidence 5.1: AKS Cluster
 
-![AKS Cluster Overview](docs/task5-aks-overview.png)
+![AKS Cluster Overview](docs/task5-kubectl-get-nodes.png)
 
 The AKS cluster `pa4-27100398` is deployed in resource group `rg-sp26-27100398`, region `ukwest`, with 1 node of size `Standard_B2s`. Provisioning state shows `Succeeded`.
 
 ### Evidence 5.2: Kubernetes Nodes and Pods
 
-![kubectl get nodes and pods](docs/task5-kubectl-nodes-pods.png)
+![kubectl get nodes and pods](docs/task5-kubectl-get-pods_running.png)
 
 `kubectl get nodes` shows the single `Standard_B2s` node in `Ready` state. `kubectl get pods` shows the `validate-api` pod in `Running` state, confirming the deployment YAML was applied correctly.
 
 ### Evidence 5.3: Kubernetes Service
 
-![kubectl get service](docs/task5-kubectl-service.png)
+![kubectl get service](docs/task5-kubectl-get-service.png)
 
 `kubectl get service validate-service` shows the LoadBalancer service with an assigned `EXTERNAL-IP`. Azure provisioned a public IP for the validator, exposing port 8080.
 
 ### Evidence 5.4: Validator API Tests
 
-![Validator API Tests](docs/task5-validator-tests.png)
+![Validator API Tests](docs/task5-validate-tests.png)
 
 Three tests were run against the external IP:
 - `GET /health` returned a healthy response
@@ -171,7 +173,7 @@ The `VALIDATE_URL` application setting was added to Function App `pa4-27100398` 
 
 ### Evidence 5.6: AKS Idle Behavior
 
-![AKS Idle](docs/task5-aks-idle.png)
+![AKS Idle](docs/running_app.jpg)
 
 Even when no orders are submitted, the AKS node remains running and the validator pod stays in `Running` state. AKS is always-on — it bills for the node VM regardless of traffic, unlike ACI which only bills during execution.
 
@@ -181,7 +183,8 @@ Even when no orders are submitted, the AKS node remains running and the validato
 
 ### Evidence 6.1: Blob Container
 
-![Reports Blob Container](docs/task6-reports-container.png)
+![Reports Blob Container](docs/task6-blob-container.png)
+![Reports Blob Container](docs/task6-blob-container_report.png)
 
 The `reports` blob container was created in storage account `pa427100398` in resource group `rg-sp26-27100398`. This is where the report-job writes its PDF output after each successful order.
 
